@@ -1,0 +1,5 @@
+$font-stack: 'Segoe UI',
+sans-serif;
+@mixin transition {
+  transition: .2s ease;
+}
