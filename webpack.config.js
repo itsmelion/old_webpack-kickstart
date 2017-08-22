@@ -5,19 +5,64 @@ const ManifestPlugin = require('webpack-manifest-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const ProgressPlugin = require('webpack/lib/ProgressPlugin');
+const CircularDependencyPlugin = require('circular-dependency-plugin');
 const ResourceHintWebpackPlugin = require('resource-hints-webpack-plugin');
-
+const {
+    NoEmitOnErrorsPlugin,
+    SourceMapDevToolPlugin,
+    NamedModulesPlugin
+} = require('webpack');
+const {
+    GlobCopyWebpackPlugin
+} = require('@angular/cli/plugins/webpack');
 const extractMain = new ExtractTextPlugin('main.[contenthash].css');
 const extractAsync = new ExtractTextPlugin('async.[contenthash].css');
 
 module.exports = {
+    resolve: {
+        alias: {
+            jquery: "jquery/src/jquery",
+            Blades: path.resolve(__dirname, 'src/views/'),
+            Controllers: path.resolve(__dirname, 'src/angular/')
+        },
+        extensions: ['.js', '.json'],
+        modules: [path.join(__dirname, 'src'), 'node_modules'],
+        "modules": [
+            "./node_modules",
+            "./node_modules"
+        ],
+        "symlinks": true
+    },
     entry: {
-        print: './src/print.js',
         main: './src/main.js',
         vendor: ["lodash", "jquery", "angular"]
     },
+    output: {
+        filename: '[name].[chunkhash].js',
+        path: path.resolve(__dirname, 'dist')
+    },
     plugins: [
         new CleanWebpackPlugin(['dist']),
+        new NoEmitOnErrorsPlugin(),
+        new GlobCopyWebpackPlugin({
+            "patterns": [
+                "fonts",
+                "images",
+                "views",
+                "favicon.ico"
+            ],
+            "globOptions": {
+                "cwd": path.join(process.cwd(), "src"),
+                "dot": true,
+                "ignore": "**/.gitkeep"
+            }
+        }),
+        new ProgressPlugin(),
+        new CircularDependencyPlugin({
+            "exclude": /(\\|\/)node_modules(\\|\/)/,
+            "failOnError": false
+        }),
         new webpack.ProvidePlugin({
             $: 'jquery',
             jQuery: 'jquery',
@@ -27,8 +72,17 @@ module.exports = {
         extractAsync,
         new HtmlWebpackPlugin({
             template: 'src/index.html',
+            hash: false,
+            inject: true,
+            compile: true,
+            favicon: false,
+            cache: true,
+            showErrors: true,
+            chunks: "all",
+            excludeChunks: [],
+            xhtml: true,
             prefetch: false,
-            preload: 'async.[contenthash].css',
+            preload: 'async.css',
             minify: {
                 collapseWhitespace: true,
                 ignoreCustomFragments: [/<%[\s\S]*?%>/, /<\?[\s\S]*?\?>/, /{{[\s\S]*?}}/, /@[\s\S]*?/],
@@ -60,18 +114,6 @@ module.exports = {
             basePath: '/dist/'
         })
     ],
-    output: {
-        filename: '[name].[chunkhash].js',
-        path: path.resolve(__dirname, 'dist')
-    },
-    resolve: {
-        alias: {
-            jquery: "jquery/src/jquery",
-            Blades: path.resolve(__dirname, 'src/views/')
-        },
-        extensions: ['.js', '.json'],
-        modules: [path.join(__dirname, 'src'), 'node_modules']
-    },
     module: {
         rules: [{
                 test: /main\.scss$/,
@@ -95,19 +137,27 @@ module.exports = {
                     }, {
                         loader: "postcss-loader"
                     }, {
-                        loader: "sass-loader"
+                        loader: "sass-loader",
+                        options: {
+                            "sourceMap": false,
+                            "precision": 3,
+                            "includePaths": []
+                        }
                     }],
                     // use style-loader in development
                     fallback: "style-loader"
                 })
             },
             {
-                test: /\.(png|svg|jpg|gif)$/,
-                use: ['file-loader']
+                "test": /\.(eot|svg|cur)$/,
+                "loader": "file-loader?name=[name].[contenthash].[ext]"
             },
             {
-                test: /\.(woff|woff2|eot|ttf|otf)$/,
-                use: ['file-loader']
+                "test": /\.(jpg|png|webp|gif|otf|ttf|woff|woff2|ani)$/,
+                loaders: [
+                    "url-loader?name=[name].[contenthash].[ext]&limit=10000",
+                    "image-webpack-loader?{optimizationLevel: 7, interlaced: false, pngquant:{quality: '65-80', speed: 4}, mozjpeg: {quality: 65}}"
+                ]
             },
             {
                 test: /\.js$/,
@@ -117,15 +167,8 @@ module.exports = {
                 }
             },
             {
-                test: /\.html$/,
+                test: /\.php$/,
                 loader: 'raw-loader'
-            },
-            {
-                test: /\.(jpe?g|png|gif|svg)$/i,
-                loaders: [
-                    'file-loader?hash=sha512&digest=hex&name=[hash].[ext]',
-                    'image-webpack-loader?{optimizationLevel: 7, interlaced: false, pngquant:{quality: "65-90", speed: 4}, mozjpeg: {quality: 65}}'
-                ]
             }
         ]
     }

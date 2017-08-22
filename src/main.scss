@@ -1,32 +1,29 @@
-// bower & vendors
-@import "styles/reset";
-// Telas
 @import "styles/variaveis";
 html,
 body {
-  font-size: 100%;
-  font-size-adjust: 200%;
-  font-family: sans-serif;
+    font-size: 100%;
+    font-size-adjust: 200%;
+    font-family: sans-serif;
 }
 
 .container {
-  position: relative;
-  margin-left: auto;
-  margin-right: auto;
-  max-width: 100%;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 100%;
 }
 
 a {
-  cursor: pointer;
-  outline: none;
-  text-decoration: none;
+    cursor: pointer;
+    outline: none;
+    text-decoration: none;
 }
 
 .text-center {
-  text-align: center;
+    text-align: center;
 }
 
 h1 {
-  color: red;
-  background: #f5f5f5;
+    color: red;
+    background: #f5f5f5;
 }
