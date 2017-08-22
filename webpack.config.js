@@ -25,10 +25,6 @@ module.exports = {
         }),
         extractMain,
         extractAsync,
-        new ManifestPlugin({
-            fileName: 'rev-manifest.json',
-            basePath: '/dist/'
-        }),
         new HtmlWebpackPlugin({
             template: 'src/index.html',
             minify: {
@@ -43,10 +39,6 @@ module.exports = {
             },
             chunksSortMode: 'dependency',
         }),
-        new ScriptExtHtmlWebpackPlugin({
-            async: /async/,
-            defaultAttribute: 'sync'
-        }),
         new webpack.optimize.CommonsChunkPlugin({
             name: ['vendor'].reverse(),
             minChunks: Infinity,
@@ -59,6 +51,10 @@ module.exports = {
                 warnings: false,
                 drop_console: false,
             }
+        }),
+        new ManifestPlugin({
+            fileName: 'rev-manifest.json',
+            basePath: '/dist/'
         })
     ],
     output: {
