@@ -5,7 +5,7 @@ const ManifestPlugin = require('webpack-manifest-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const ScriptExtHtmlWebpackPlugin = require('script-ext-html-webpack-plugin');
+const ResourceHintWebpackPlugin = require('resource-hints-webpack-plugin');
 
 const extractMain = new ExtractTextPlugin('main.[contenthash].css');
 const extractAsync = new ExtractTextPlugin('async.[contenthash].css');
@@ -27,6 +27,8 @@ module.exports = {
         extractAsync,
         new HtmlWebpackPlugin({
             template: 'src/index.html',
+            prefetch: false,
+            preload: 'async.[contenthash].css',
             minify: {
                 collapseWhitespace: true,
                 ignoreCustomFragments: [/<%[\s\S]*?%>/, /<\?[\s\S]*?\?>/, /{{[\s\S]*?}}/, /@[\s\S]*?/],
@@ -39,6 +41,7 @@ module.exports = {
             },
             chunksSortMode: 'dependency',
         }),
+        new ResourceHintWebpackPlugin(),
         new webpack.optimize.CommonsChunkPlugin({
             name: ['vendor'].reverse(),
             minChunks: Infinity,
